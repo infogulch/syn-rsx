@@ -48,10 +48,18 @@ fn walk_nodes<'a>(nodes: &'a Vec<Node>, context: Option<NodeType>) -> (String, V
                     values.push(value);
                 }
             }
-            Node::Text(text) => {
-                out.push_str("{}");
-                values.push(&text.value);
-            }
+            Node::Text(text) => match text.value.as_ref() {
+                syn::Expr::Lit(lit) => match &lit.lit {
+                    syn::Lit::Str(lits) => {
+                        html_escape::encode_text_to_string(&lits.value(), &mut out);
+                    }
+                    _ => unimplemented!(),
+                },
+                _ => {
+                    out.push_str("{}");
+                    values.push(&text.value);
+                }
+            },
             Node::Fragment(fragment) => {
                 let (html_string, children_values) =
                     walk_nodes(&fragment.children, Some(NodeType::Fragment));

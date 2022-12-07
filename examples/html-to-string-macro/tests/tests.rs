@@ -1,6 +1,28 @@
 use html_to_string_macro::html;
 
 #[test]
+fn test_injection() {
+    let injected = html! {
+        <p>"Some text <em>with embedded emphasis tag</em>."</p>
+    };
+    assert_eq!(
+        injected,
+        r#"<p>Some text &lt;em&gt;with embedded emphasis tag&lt;/em&gt;.</p>"#
+    );
+}
+
+#[test]
+fn test_injection2() {
+    let injected = html! {
+        <p>"Some text "{ html!{ <em>"with embedded html! invocation"</em> } }"."</p>
+    };
+    assert_eq!(
+        injected,
+        r#"<p>Some text <em>with embedded html! invocation</em>.</p>"#
+    );
+}
+
+#[test]
 fn test() {
     let world = "planet";
     assert_eq!(
